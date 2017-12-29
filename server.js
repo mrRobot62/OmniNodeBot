@@ -1,3 +1,5 @@
+'use strict';
+
 var five = require('johnny-five'),
     board = new five.Board(),
     PORT = 8080,
@@ -37,6 +39,9 @@ board.on('ready', function() {
       invertPWM: true
     })
   };
+  motors.m1.stop();
+  motors.m2.stop();
+  motors.m3.steop();
 
   led = new five.Led(13);
 });
@@ -122,3 +127,52 @@ request.post(webappURL, function(e, r, body) {
     return console.error('POST request failed:', e);
   }
 });
+
+
+//----------------------------------------------------
+// Omniwheel kinematic
+//----------------------------------------------------
+var drive = function(x,y) {
+  vector = cartesian2Polor(x,y);
+  speeds = calculateSpeeds(vector);
+  driveMotors(motors, speeds);
+}
+
+var driveMotors = function (motors, speeds) {
+
+}
+
+var cartesian2Polor = function(x,y) {
+  theta = Math.atan2(x,y);
+  r = Math.sqrt(y*y + x*x);
+  return (r,theta);
+}
+
+var calculateSpeeds = function(r, theta) {
+  vx = Math.cos(theta) * r;
+  vy = Math.sin(theta) * r;
+
+  w1 = -vx;
+  w2 = (0.5 * vx) - (Math.sqrt(3/2) * vy);
+  v3 = (0.5 * vx) - (math.sqrt(3/2) * vy);
+
+  return [w1, w2, w3];
+}
+
+
+//------------------------------------------------------
+// little helper functions
+//------------------------------------------------------
+var map = function (x, in_min, in_max, out_min, out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+var clamp = function (num, min, max) {
+  //return num <= min ? min : num >= max ? max : num;
+  return Math.max(min,Math.min(num,max));
+}
+
+var mapRange = function(n) {
+  n = Math.ceil((n*255) / 122.4744871391589);
+
+}
